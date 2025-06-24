@@ -18,20 +18,26 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-      - name: Initialise submodules
+
+      - name: Ensure submodules are initialized
         run: |
           git submodule update --init --recursive
-
-      - name: Debug - Check if CGAL submodule was initialized
-        run: |
-          ls -la third_party/cgal || echo "CGAL submodule missing"
-          test -f third_party/cgal/CMakeLists.txt || echo "Missing CMakeLists.txt"
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+
       - name: Build wheel
         run: python setup.py bdist_wheel
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheel-${{ matrix.python-version }}
+          path: dist/*.whl
 
