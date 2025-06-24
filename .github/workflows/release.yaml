@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgmp-dev libmpfr-dev libboost-all-dev libeigen3-dev
+          sudo apt-get install -y libgmp-dev libmpfr-dev libboost-all-dev libeigen3-dev libtbb-dev
           
       - name: Patch draco headers
         run: |
