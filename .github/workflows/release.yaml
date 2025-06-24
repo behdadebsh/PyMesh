@@ -32,6 +32,12 @@ jobs:
         run: |
           sed -i '1i#include <cstddef>' third_party/draco/src/draco/core/hash_utils.h
           sed -i '1i#include <limits>' third_party/draco/src/draco/io/parser_utils.cc
+          
+      - name: Add compiler flags for TBB
+        run: |
+          export CXXFLAGS="-Wno-changes-meaning-declaration"
+          mkdir -p build
+          cmake .. -DCMAKE_CXX_FLAGS="$CXXFLAGS"
 
       - name: Set up Python
         uses: actions/setup-python@v4
