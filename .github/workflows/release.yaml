@@ -18,6 +18,9 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+      - name: Initialise submodules
+        run: |
+          git submodule update --init --recursive
 
       - name: Debug - Check if CGAL submodule was initialized
         run: |
