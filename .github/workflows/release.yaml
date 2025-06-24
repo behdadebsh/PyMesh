@@ -35,10 +35,9 @@ jobs:
           
       - name: Configure build (with TBB fix)
         run: |
-          mkdir build
-          cd build
-          cmake .. \
-            -DCMAKE_CXX_FLAGS="-Wno-changes‑meaning-declaration"
+          export CXXFLAGS="-Wno-changes-meaning-declaration"
+          mkdir build && cd build
+          cmake .. -DCMAKE_CXX_FLAGS="$CXXFLAGS"
 
       - name: Set up Python
         uses: actions/setup-python@v4
