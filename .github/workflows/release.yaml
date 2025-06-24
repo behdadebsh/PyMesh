@@ -23,7 +23,7 @@ jobs:
         run: |
           ls -la third_party/cgal || echo "CGAL submodule missing"
           test -f third_party/cgal/CMakeLists.txt || echo "Missing CMakeLists.txt"
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
