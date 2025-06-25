@@ -30,6 +30,9 @@ jobs:
           sed -i '1i#include <cstddef>' third_party/draco/src/draco/core/hash_utils.h
           sed -i '1i#include <limits>' third_party/draco/src/draco/io/parser_utils.cc
 
+      - name: List all CMake targets
+        run: cmake --build build --target help
+
       - name: Configure CMake build directory
         run: |
           export CXXFLAGS="-Wno-changes-meaning-declaration"
@@ -37,9 +40,6 @@ jobs:
             -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
             -DTBB_INCLUDE_DIR="/usr/include/tbb" \
             -DTBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so"
-
-      - name: List all CMake targets
-        run: cmake --build build --target help
 
       - name: Build all targets
         run: cmake --build build -- -j$(nproc)
