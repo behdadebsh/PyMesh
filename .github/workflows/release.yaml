@@ -37,7 +37,11 @@ jobs:
         run: |
           export CXXFLAGS="-Wno-changes-meaning-declaration"
           mkdir build && cd build
-          cmake .. -DCMAKE_CXX_FLAGS="$CXXFLAGS"
+          cmake .. \
+            -DCMAKE_CXX_FLAGS="-Wno-changes-meaning-declaration" \
+            -DTBB_INCLUDE_DIR="/usr/include/tbb" \
+            -DTBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so" \
+            -DTBB_TBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so"
 
       - name: Set up Python
         uses: actions/setup-python@v4
