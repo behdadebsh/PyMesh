@@ -64,6 +64,10 @@ if (TARGET PyMesh::TetGen)
     target_link_libraries(PyMesh PRIVATE PyMesh::TetGen)
 endif()
 
+if (TARGET PyMesh::Wires)
+    target_link_libraries(PyMesh PRIVATE PyMesh::Wires)
+endif()
+
 
 target_include_directories(PyMesh SYSTEM PRIVATE
     ${PROJECT_SOURCE_DIR}/src
