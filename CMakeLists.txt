@@ -9,7 +9,6 @@ include(Settings.cmake)
 add_subdirectory(src)
 add_subdirectory(tools)
 add_subdirectory(python)
-add_subdirectory(tools/Wires build/tools/Wires_build)
 
 
 add_subdirectory(tests EXCLUDE_FROM_ALL)
