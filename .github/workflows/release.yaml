@@ -42,7 +42,6 @@ jobs:
             -DTBB_INCLUDE_DIR="/usr/include/tbb" \
             -DTBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so" \
             -DTBB_TBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so"
-            -DENABLE_WIRES=OFF
 
       - name: Set up Python
         uses: actions/setup-python@v4
