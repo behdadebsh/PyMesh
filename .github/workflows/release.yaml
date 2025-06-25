@@ -19,32 +19,30 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Ensure submodules are initialized
-        run: |
-          git submodule update --init --recursive
-
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgmp-dev libmpfr-dev libboost-all-dev libeigen3-dev libtbb-dev nlohmann-json3-dev
-          
+          sudo apt-get install -y libgmp-dev libmpfr-dev libboost-all-dev \
+            libeigen3-dev libtbb-dev nlohmann-json3-dev
+
       - name: Patch draco headers
         run: |
           sed -i '1i#include <cstddef>' third_party/draco/src/draco/core/hash_utils.h
           sed -i '1i#include <limits>' third_party/draco/src/draco/io/parser_utils.cc
-      
-      - name: List all CMake targets
-        run: cmake --build build --target help
-          
-      - name: Configure build (with TBB fix)
+
+      - name: Configure CMake build directory
         run: |
           export CXXFLAGS="-Wno-changes-meaning-declaration"
-          mkdir build && cd build
-          cmake .. \
-            -DCMAKE_CXX_FLAGS="-Wno-changes-meaning-declaration" \
+          cmake -S . -B build \
+            -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
             -DTBB_INCLUDE_DIR="/usr/include/tbb" \
-            -DTBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so" \
-            -DTBB_TBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so"
+            -DTBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so"
+
+      - name: List all CMake targets
+        run: cmake --build build --target help
+
+      - name: Build all targets
+        run: cmake --build build -- -j$(nproc)
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -55,8 +53,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip wheel setuptools
 
-      - name: Build wheel
-        run: python setup.py bdist_wheel
+      - name: Build Python wheel
+        run: |
+          cp -r build/python .  # if build artifacts are placed there
+          python setup.py bdist_wheel
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
