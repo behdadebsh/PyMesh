@@ -9,6 +9,8 @@ include(Settings.cmake)
 add_subdirectory(src)
 add_subdirectory(tools)
 add_subdirectory(python)
+add_subdirectory(python/pymesh/wires)
+
 
 add_subdirectory(tests EXCLUDE_FROM_ALL)
 #add_subdirectory(examples EXCLUDE_FROM_ALL)
