@@ -7,8 +7,7 @@ include(Settings.cmake)
 
 # Process code in each subdirectories
 add_subdirectory(src)
-add_subdirectory(tools tools_build)                # builds tools subprojects
-add_subdirectory(tools/Wires tools/Wires_build)    # builds Wires as separate project
+add_subdirectory(tools)
 add_subdirectory(python)
 
 

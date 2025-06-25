@@ -22,5 +22,5 @@ add_subdirectory(BVH)
 add_subdirectory(Compression)
 add_subdirectory(Tetrahedralization)
 add_subdirectory(SparseSolver)
-add_subdirectory(Wires)
+add_subdirectory(Wires Wires_build)  # builds sources in tools/Wires to build/tools/Wires_build
 add_subdirectory(Envelope)
