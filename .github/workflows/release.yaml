@@ -33,10 +33,11 @@ jobs:
       - name: Configure CMake build directory
         run: |
           export CXXFLAGS="-Wno-changes-meaning-declaration"
-          cmake -S . -B build \
-            -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+          cmake -B build -S . \
+            -DCMAKE_CXX_FLAGS="-Wno-changes-meaning-declaration" \
             -DTBB_INCLUDE_DIR="/usr/include/tbb" \
             -DTBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so"
+            -DTBB_TBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so"
 
       - name: List all CMake targets
         run: cmake --build build --target help
