@@ -42,7 +42,7 @@ target_link_libraries(PyMesh PRIVATE
     PyMesh::Tetrahedralization
     PyMesh::Triangulation
     PyMesh::WindingNumber
-    PyMesh::Wires)
+)
 
 if (TARGET PyMesh::CGAL)
     target_link_libraries(PyMesh PRIVATE PyMesh::CGAL)
