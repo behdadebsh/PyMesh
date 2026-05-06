@@ -81,7 +81,7 @@ jobs:
         run: cmake --build build --parallel $(nproc)
 
       - name: Build wheel
-        run: python setup.py bdist_wheel --skip-build
+        run: python setup.py bdist_wheel
 
       - name: Verify wheel imports correctly
         run: |
