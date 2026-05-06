@@ -20,7 +20,7 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      # Set up Python FIRST so CMake can find the right interpreter
+      # Set up Python FIRST so everything uses the right interpreter
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -38,22 +38,30 @@ jobs:
             libeigen3-dev \
             libtbb-dev \
             nlohmann-json3-dev \
-            cmake ninja-build
+            cmake ninja-build \
+            patchelf
 
-      # Patch headers that are broken with modern gcc/clang
+      # Patch headers that are broken with modern gcc
       - name: Patch draco headers for modern compilers
         run: |
           sed -i '1i#include <cstddef>' third_party/draco/src/draco/core/hash_utils.h
-          if grep -q "INT_MAX\|UINT_MAX" third_party/draco/src/draco/io/parser_utils.cc 2>/dev/null; then
-            sed -i '1i#include <limits>' third_party/draco/src/draco/io/parser_utils.cc
-          fi
+          grep -q "#include <limits>" third_party/draco/src/draco/io/parser_utils.cc \
+            || sed -i '1i#include <limits>' third_party/draco/src/draco/io/parser_utils.cc
 
-      # Detect Python paths to pass to CMake explicitly
-      - name: Get Python paths
+      # This is the critical step that was missing: build Triangle, TetGen, and
+      # other third-party libs so their CMake targets become available.
+      - name: Build third-party dependencies
+        run: |
+          cd third_party
+          python build.py triangle
+          python build.py tetgen
+          python build.py eigen
+          python build.py json
+
+      - name: Get Python paths for CMake
         id: python-info
         run: |
           echo "PYTHON_EXECUTABLE=$(python -c 'import sys; print(sys.executable)')" >> $GITHUB_OUTPUT
-          echo "PYTHON_INCLUDE=$(python -c 'import sysconfig; print(sysconfig.get_path("include"))')" >> $GITHUB_OUTPUT
           echo "PYTHON_VERSION=$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')" >> $GITHUB_OUTPUT
 
       - name: Configure CMake
@@ -63,25 +71,18 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_FLAGS="-Wno-changes-meaning-declaration" \
             -DPYTHON_EXECUTABLE=${{ steps.python-info.outputs.PYTHON_EXECUTABLE }} \
-            -DPython3_EXECUTABLE=${{ steps.python-info.outputs.PYTHON_EXECUTABLE }} \
             -DPythonLibsNew_FIND_VERSION=${{ steps.python-info.outputs.PYTHON_VERSION }} \
             -DTBB_INCLUDE_DIR="/usr/include/tbb" \
-            -DTBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so" \
-            -DTBB_TBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so"
+            -DTBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so"
 
       - name: Build
         run: cmake --build build --parallel $(nproc)
 
-      # The CMake build puts the .so files into python/pymesh/lib/
-      # We install them there so setup.py can find them for packaging
       - name: Install built modules into python package tree
         run: cmake --build build --target install
 
       - name: Build wheel
-        run: |
-          # Use --no-build-isolation so setup.py skips its cmake_build step
-          # and just packages what is already built
-          python setup.py bdist_wheel --skip-build
+        run: python setup.py bdist_wheel --skip-build
 
       - name: Verify wheel imports correctly
         run: |
