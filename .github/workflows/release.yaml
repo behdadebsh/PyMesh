@@ -41,14 +41,14 @@ jobs:
             cmake ninja-build \
             patchelf
 
-      # Patch headers that are broken with modern gcc
+            # Patch headers that are broken with modern gcc
       - name: Patch draco headers for modern compilers
-  run: |
-    grep -q "#include <cstddef>" third_party/draco/src/draco/core/hash_utils.h || \
-      sed -i '1i#include <cstddef>' third_party/draco/src/draco/core/hash_utils.h
+        run: |
+          grep -q "#include <cstddef>" third_party/draco/src/draco/core/hash_utils.h || \
+            sed -i '1i#include <cstddef>' third_party/draco/src/draco/core/hash_utils.h
 
-    grep -q "#include <limits>" third_party/draco/src/draco/io/parser_utils.cc || \
-      sed -i '1i#include <limits>' third_party/draco/src/draco/io/parser_utils.cc
+          grep -q "#include <limits>" third_party/draco/src/draco/io/parser_utils.cc || \
+            sed -i '1i#include <limits>' third_party/draco/src/draco/io/parser_utils.cc
 
       # This is the critical step that was missing: build Triangle, TetGen, and
       # other third-party libs so their CMake targets become available.
