@@ -80,9 +80,6 @@ jobs:
       - name: Build
         run: cmake --build build --parallel $(nproc)
 
-      - name: Install built modules into python package tree
-        run: cmake --build build --target install
-
       - name: Build wheel
         run: python setup.py bdist_wheel --skip-build
 
