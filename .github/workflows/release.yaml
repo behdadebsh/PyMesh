@@ -11,12 +11,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-13]
+        os: [ubuntu-latest, macos-15]
         python-version: ['3.10', '3.11', '3.12']
 
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
@@ -72,14 +72,29 @@ jobs:
           echo "PYTHON_EXECUTABLE=$(python -c 'import sys; print(sys.executable)')" >> $GITHUB_OUTPUT
           echo "PYTHON_VERSION=$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')" >> $GITHUB_OUTPUT
 
-      - name: Configure CMake
+            - name: Configure CMake (Linux)
+        if: runner.os == 'Linux'
         run: |
           cmake -B build -S . \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_FLAGS="-Wno-changes-meaning-declaration" \
             -DPYTHON_EXECUTABLE=${{ steps.python-info.outputs.PYTHON_EXECUTABLE }} \
-            -DPythonLibsNew_FIND_VERSION=${{ steps.python-info.outputs.PYTHON_VERSION }}
+            -DPythonLibsNew_FIND_VERSION=${{ steps.python-info.outputs.PYTHON_VERSION }} \
+            -DTBB_INCLUDE_DIR="/usr/include/tbb" \
+            -DTBB_LIBRARY="/usr/lib/x86_64-linux-gnu/libtbb.so"
+
+      - name: Configure CMake (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          cmake -B build -S . \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-Wno-changes-meaning-declaration" \
+            -DPYTHON_EXECUTABLE=${{ steps.python-info.outputs.PYTHON_EXECUTABLE }} \
+            -DPythonLibsNew_FIND_VERSION=${{ steps.python-info.outputs.PYTHON_VERSION }} \
+            -DTBB_INCLUDE_DIR="$(brew --prefix tbb)/include" \
+            -DTBB_LIBRARY="$(brew --prefix tbb)/lib/libtbb.dylib"
 
       - name: Build
         run: cmake --build build --parallel
