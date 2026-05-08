@@ -107,7 +107,6 @@ jobs:
           cmake -B build -S . \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
             -DPYTHON_EXECUTABLE=${{ steps.python-info.outputs.PYTHON_EXECUTABLE }} \
             -DPythonLibsNew_FIND_VERSION=${{ steps.python-info.outputs.PYTHON_VERSION }} \
             -DTBB_INCLUDE_DIR="$(brew --prefix tbb)/include" \
