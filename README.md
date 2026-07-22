@@ -49,10 +49,9 @@ To retrieve the code:
 
 PyMesh has the following required dependencies:
 
-* [Python](https://www.python.org/) v2.7 and v3.x.
+* [Python](https://www.python.org/) v3.8 through v3.12.
 * [NumPy](http://www.numpy.org/) v1.8 or higher
 * [SciPy](http://www.scipy.org/) v0.13 or higher
-* [nose](http://nose.readthedocs.io/en/latest/) v1.3.7 or higher
 
 The following C++ libraries are required.  They are included in
 `$PYMESH_PATH/third_party` directory.

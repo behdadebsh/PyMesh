@@ -34,13 +34,14 @@ def patch_wheel(wheel_file):
 
     # Gather all dependent shared libs into lib_dir.
     lib_dir = os.path.join(extraction_dir, "pymesh/lib")
-    pymesh_lib_pattern = re.compile("libPyMesh-.*\.so")
+    pymesh_lib_pattern = re.compile(r"libPyMesh-.*\.so")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     for lib_file in os.listdir(lib_dir):
         if pymesh_lib_pattern.match(lib_file) is None:
             continue
         cmd = "./package_dependencies.py {}".format(
                 os.path.join(lib_dir, lib_file))
-        check_call(cmd.split(), cwd="/root/PyMesh/docker/patches")
+        check_call(cmd.split(), cwd=script_dir)
 
     cmd = "rm -rf {}".format(os.path.join(extraction_dir, "pymesh/third_party"))
     check_call(cmd.split())

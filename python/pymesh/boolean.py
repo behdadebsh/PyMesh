@@ -16,7 +16,7 @@ def _auto_select_engine(dim):
 
 def boolean(mesh_1, mesh_2, operation, engine="auto", with_timing=False,
         exact_mesh_file=None):
-    """ Perform boolean operations on input meshes.
+    r""" Perform boolean operations on input meshes.
 
     Args:
         mesh_1 (:class:`Mesh`): The first input mesh, :math:`M_1`.
@@ -109,4 +109,3 @@ def boolean(mesh_1, mesh_2, operation, engine="auto", with_timing=False,
         return output_mesh, running_time
     else:
         return output_mesh
-

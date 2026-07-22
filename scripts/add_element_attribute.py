@@ -6,7 +6,6 @@ Add per-element scalar field to mesh computed from a given formula.
 
 import argparse
 import numpy as np
-import parser
 import re
 
 import pymesh
@@ -14,7 +13,7 @@ import pymesh
 class Formula:
     def __init__(self, mesh):
         self.mesh = mesh;
-        self.field_parser = re.compile("\{\w+\}");
+        self.field_parser = re.compile(r"\{\w+\}");
         self.__load_default_fields();
 
     def __load_default_fields(self):
@@ -50,8 +49,7 @@ class Formula:
             self.formula = self.formula.replace(name,
                     "self.{}".format(escaped_name));
 
-        st = parser.expr(self.formula);
-        code = st.compile("file.py");
+        code = compile(self.formula, "file.py", "eval");
         return eval(code);
 
     def load_field(self, name):

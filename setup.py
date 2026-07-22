@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
+from setuptools import setup, Distribution, Extension
 from distutils.command.build import build
 from distutils.command.build_ext import build_ext
 from distutils.command.clean import clean
 import multiprocessing
 import os
 import os.path
-from setuptools import setup, Distribution, Extension
 from subprocess import check_call
 import shutil
 import platform
@@ -104,12 +104,21 @@ class cmake_build(build):
         build.run(self)
 
 setup(
-        name = "pymesh2",
+        name = "pymeshv2",
         description = "Mesh Processing for Python",
         version = __version__,
         author = "Qingnan Zhou",
         author_email = "qnzhou@gmail.com",
         license = "MPL",
+        python_requires = ">=3.8,<3.13",
+        classifiers = [
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+        ],
         zip_safe = False,
         package_dir = {"": "python"},
         packages = ["pymesh", "pymesh.misc", "pymesh.meshutils", "pymesh.wires",

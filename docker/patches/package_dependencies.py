@@ -22,7 +22,7 @@ def extract_rpaths_darwin(lib_file):
     cmd = "otool -l {}".format(lib_file)
     output = check_output(cmd.split()).decode("ASCII")
 
-    pattern = "cmd LC_RPATH\n\s*cmdsize\s+\d+\n\s*path\s+(.*)\s+\(offset\s+\d+\)"
+    pattern = r"cmd LC_RPATH\n\s*cmdsize\s+\d+\n\s*path\s+(.*)\s+\(offset\s+\d+\)"
     rpaths = re.findall(pattern, output, re.M)
     return rpaths
 
