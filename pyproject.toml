@@ -7,7 +7,8 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-build = "cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64"
+build = "cp310-* cp311-* cp312-*"
+skip = "*-musllinux*"
 build-frontend = "build[uv]"
 test-requires = [
     "numpy>=1.10.4",
@@ -21,3 +22,15 @@ manylinux-x86_64-image = "manylinux_2_28"
 before-all = "dnf install -y boost-devel cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gmp-devel mpfr-devel unzip zip && ln -sf /usr/bin/cmake /usr/local/bin/cmake"
 repair-wheel-command = "LD_LIBRARY_PATH=/project/python/pymesh/third_party/lib auditwheel repair -w {dest_dir} {wheel}"
 environment = { CC = "/opt/rh/gcc-toolset-9/root/usr/bin/gcc", CXX = "/opt/rh/gcc-toolset-9/root/usr/bin/g++", NUM_CORES = "2" }
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64"]
+before-all = "brew install boost cmake gmp mpfr"
+environment = { MACOSX_DEPLOYMENT_TARGET = "13.0", NUM_CORES = "2" }
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
+before-all = "C:/vcpkg/vcpkg.exe install boost:x64-windows gmp:x64-windows mpfr:x64-windows"
+before-build = "python -m pip install delvewheel"
+environment = { CMAKE_ARGS = "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows", NUM_CORES = "2" }
+repair-wheel-command = "python -m delvewheel repair -w {dest_dir} {wheel}"

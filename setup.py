@@ -10,6 +10,8 @@ import os.path
 from subprocess import check_call
 import shutil
 import platform
+import shlex
+import sys
 
 exec(open(os.path.join('python/pymesh/version.py')).read())
 
@@ -50,22 +52,22 @@ class cmake_build(build):
         """
         Config and build third party dependencies.
         """
-        commands = [
-                "third_party/build.py cgal",
-                "third_party/build.py eigen",
-                "third_party/build.py triangle",
-                "third_party/build.py tetgen",
-                "third_party/build.py clipper",
-                "third_party/build.py qhull",
-                "third_party/build.py cork",
+        dependencies = [
+                "cgal",
+                "eigen",
+                "triangle",
+                "tetgen",
+                "clipper",
+                "qhull",
+                "cork",
                 #"third_party/build.py carve",
-                "third_party/build.py draco",
-                "third_party/build.py tbb",
-                "third_party/build.py mmg",
-                "third_party/build.py json",
+                "draco",
+                "tbb",
+                "mmg",
+                "json",
                 ];
-        for c in commands:
-            check_call(c.split())
+        for dependency in dependencies:
+            check_call([sys.executable, "third_party/build.py", dependency])
 
     def build_pymesh(self):
         """
@@ -74,7 +76,7 @@ class cmake_build(build):
         python_version = "{v[0]}.{v[1]}".format(v=platform.python_version_tuple())
         self._build(
             "build_{}".format(python_version),
-            " -DPythonLibsNew_FIND_VERSION={}".format(python_version),
+            ["-DPythonLibsNew_FIND_VERSION={}".format(python_version)],
             False,
         )
 
@@ -89,12 +91,23 @@ class cmake_build(build):
                 os.makedirs(build_dir)
 
             os.chdir(build_dir)
-            commands = [
-                "cmake .. -DCMAKE_BUILD_TYPE=Release" + cmake_args,
-                "cmake --build . --config Release -- -j {}".format(num_cores),
-            ] + (["cmake --build . --target install"] if want_install else [])
-            for c in commands:
-                check_call(c.split())
+            extra_cmake_args = shlex.split(
+                os.environ.get("CMAKE_ARGS", ""),
+                posix=os.name != "nt",
+            )
+            check_call([
+                "cmake", "..", "-DCMAKE_BUILD_TYPE=Release",
+                *cmake_args, *extra_cmake_args,
+            ])
+            check_call([
+                "cmake", "--build", ".", "--config", "Release",
+                "--parallel", str(num_cores),
+            ])
+            if want_install:
+                check_call([
+                    "cmake", "--build", ".", "--config", "Release",
+                    "--target", "install", "--parallel", str(num_cores),
+                ])
         finally:
             os.chdir(cwd)
 

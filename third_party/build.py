@@ -9,6 +9,7 @@ import os
 import os.path
 import tempfile
 import shutil
+import shlex
 import sys
 
 def get_third_party_dependencies():
@@ -34,20 +35,30 @@ def build_generic(libname, build_flags="", cleanup=True):
         os.makedirs(build_dir);
 
     # Configure cgal
-    cmd = "cmake" + \
-            " {}/third_party/{}".format(pymesh_dir, libname) + \
-            " -DBUILD_SHARED_LIBS=Off" + \
-            " -DCMAKE_POSITION_INDEPENDENT_CODE=On" + \
-            build_flags + \
-            " -DCMAKE_INSTALL_PREFIX={}/python/pymesh/third_party/".format(pymesh_dir);
-    subprocess.check_call(cmd.split(), cwd=build_dir);
+    cmake_args = shlex.split(
+            os.environ.get("CMAKE_ARGS", ""),
+            posix=os.name != "nt");
+    dependency_args = shlex.split(build_flags, posix=os.name != "nt");
+    cmd = [
+            "cmake",
+            os.path.join(pymesh_dir, "third_party", libname),
+            "-DBUILD_SHARED_LIBS=Off",
+            "-DCMAKE_POSITION_INDEPENDENT_CODE=On",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_INSTALL_PREFIX={}".format(
+                os.path.join(pymesh_dir, "python", "pymesh", "third_party")),
+            ] + dependency_args + cmake_args;
+    subprocess.check_call(cmd, cwd=build_dir);
 
     # Build cgal
-    cmd = "cmake --build {}".format(build_dir);
-    subprocess.check_call(cmd.split());
+    parallel = os.environ.get("NUM_CORES", str(os.cpu_count() or 1));
+    cmd = ["cmake", "--build", build_dir, "--config", "Release",
+            "--parallel", parallel];
+    subprocess.check_call(cmd);
 
-    cmd = "cmake --build {} --target install".format(build_dir);
-    subprocess.check_call(cmd.split());
+    cmd = ["cmake", "--build", build_dir, "--config", "Release",
+            "--target", "install", "--parallel", parallel];
+    subprocess.check_call(cmd);
 
     # Clean up
     if cleanup:
