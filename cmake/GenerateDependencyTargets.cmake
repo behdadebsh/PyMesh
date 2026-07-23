@@ -154,7 +154,6 @@ if (CGAL_FOUND AND PYMESH_USE_CGAL
         AND TARGET Boost::chrono
         AND TARGET Boost::date_time
         AND TARGET Boost::thread
-        AND TARGET Boost::system
         AND NOT TARGET PyMesh::third_party::CGAL)
     add_library(PyMesh::third_party::CGAL INTERFACE IMPORTED)
     target_include_directories(PyMesh::third_party::CGAL SYSTEM
@@ -167,7 +166,6 @@ if (CGAL_FOUND AND PYMESH_USE_CGAL
             Boost::chrono
             Boost::date_time
             Boost::thread
-            Boost::system
             ${CGAL_LIBRARIES}
             ${CGAL_3RD_PARTY_LIBRARIES}
     )
@@ -187,7 +185,7 @@ if (CGAL_FOUND AND PYMESH_USE_CGAL
 endif ()
 
 
-if (LIBIGL_FOUND AND PYMESH_USE_LIBIGL AND NOT TARGET PyMesh::third_party::libigl)
+if (libigl_FOUND AND PYMESH_USE_LIBIGL AND NOT TARGET PyMesh::third_party::libigl)
     add_library(PyMesh::third_party::libigl INTERFACE IMPORTED)
     target_include_directories(PyMesh::third_party::libigl SYSTEM
         INTERFACE ${LIBIGL_INCLUDE_DIRS})
