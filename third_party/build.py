@@ -65,6 +65,26 @@ def build_generic(libname, build_flags="", cleanup=True):
     if cleanup:
         shutil.rmtree(build_dir)
 
+def patch_eigen_for_modern_compilers():
+    """Backport Eigen 3.4's transposition expression fix.
+
+    Recent Clang and GCC versions validate this template body eagerly and reject
+    ``derived()`` on the specialized Transpose type used by the pinned Eigen
+    revision. Eigen 3.4 passes the expression itself instead.
+    """
+    header = os.path.join(
+            get_pymesh_dir(), "python", "pymesh", "third_party", "include",
+            "eigen3", "Eigen", "src", "Core", "Transpositions.h");
+    with open(header, "r", encoding="utf-8") as fin:
+        contents = fin.read();
+    old = "matrix.derived(), trt.derived());"
+    new = "matrix.derived(), trt);"
+    if old in contents:
+        with open(header, "w", encoding="utf-8") as fout:
+            fout.write(contents.replace(old, new));
+    elif new not in contents:
+        raise RuntimeError("Could not apply the Eigen transposition patch")
+
 def build(package, cleanup):
     if package == "all":
         for libname in get_third_party_dependencies():
@@ -75,6 +95,9 @@ def build(package, cleanup):
                 cleanup=cleanup);
     elif package == "clipper":
         build_generic("Clipper/cpp", cleanup=cleanup);
+    elif package == "eigen":
+        build_generic("eigen", cleanup=cleanup);
+        patch_eigen_for_modern_compilers();
     elif package == "tbb":
         build_generic("tbb",
                 " -DTBB_BUILD_SHARED=On -DTBB_BUILD_STATIC=Off",
