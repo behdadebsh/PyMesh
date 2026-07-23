@@ -110,11 +110,9 @@ setup(
         author = "Qingnan Zhou",
         author_email = "qnzhou@gmail.com",
         license = "MPL",
-        python_requires = ">=3.8,<3.13",
+        python_requires = ">=3.10,<3.13",
         classifiers = [
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.8",
-            "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
             "Programming Language :: Python :: 3.12",

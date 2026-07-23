@@ -42,5 +42,5 @@ a version have been published, increment the package version before retrying.
 ## Published artifacts
 
 The workflow publishes manylinux x86-64 wheels for supported CPython versions
-3.8 through 3.12 and a source distribution. Other platforms install from the
+3.10 through 3.12 and a source distribution. Other platforms install from the
 source distribution and therefore need PyMesh's native build dependencies.
