@@ -100,6 +100,21 @@ def patch_cgal_for_modern_boost():
     elif new not in contents:
         raise RuntimeError("Could not add the required Boost.MPL include to CGAL")
 
+    iterator = os.path.join(
+            get_pymesh_dir(), "python", "pymesh", "third_party", "include",
+            "CGAL", "boost", "graph", "iterator.h")
+    with open(iterator, "r", encoding="utf-8") as fin:
+        contents = fin.read()
+    old = "return (! (this->base() == nullptr)) ?"
+    new = "return (g != nullptr) ?"
+    if old in contents:
+        if contents.count(old) != 3:
+            raise RuntimeError("Unexpected CGAL iterator compatibility sites")
+        with open(iterator, "w", encoding="utf-8") as fout:
+            fout.write(contents.replace(old, new))
+    elif contents.count(new) != 3:
+        raise RuntimeError("Could not patch CGAL iterators for modern Boost")
+
 def patch_cork_for_msvc():
     """Adapt the pinned Cork sources to the GMP package available on Windows."""
     if os.name != "nt":
@@ -116,7 +131,10 @@ def patch_cork_for_msvc():
             "#ifndef _USE_MATH_DEFINES\n"
             "#define _USE_MATH_DEFINES\n"
             "#endif\n\n"
-            "#include <cmath>")
+            "#include <cmath>\n\n"
+            "#ifndef M_PI\n"
+            "#define M_PI 3.14159265358979323846\n"
+            "#endif")
     if old in contents:
         with open(prelude, "w", encoding="utf-8") as fout:
             fout.write(contents.replace(old, new, 1))
@@ -135,6 +153,19 @@ def patch_cork_for_msvc():
             fout.write(contents.replace(old, new, 1))
     elif old not in contents and new not in contents:
         raise RuntimeError("Could not switch Cork from MPIR to GMP")
+
+    gmpext = os.path.join(
+            get_pymesh_dir(), "third_party", "cork", "src", "isct",
+            "gmpext4.h")
+    with open(gmpext, "r", encoding="utf-8") as fin:
+        contents = fin.read()
+    old = "#include <mpirxx.h>"
+    new = "#include <gmpxx.h>"
+    if old in contents:
+        with open(gmpext, "w", encoding="utf-8") as fout:
+            fout.write(contents.replace(old, new, 1))
+    elif new not in contents:
+        raise RuntimeError("Could not switch Cork C++ bindings from MPIR to GMP")
 
 def build(package, cleanup):
     if package == "all":
