@@ -85,6 +85,21 @@ def patch_eigen_for_modern_compilers():
     elif new not in contents:
         raise RuntimeError("Could not apply the Eigen transposition patch")
 
+def patch_cgal_for_modern_boost():
+    """Add the Boost.MPL include no longer supplied transitively by Boost."""
+    header = os.path.join(
+            get_pymesh_dir(), "python", "pymesh", "third_party", "include",
+            "CGAL", "number_utils.h")
+    with open(header, "r", encoding="utf-8") as fin:
+        contents = fin.read()
+    old = "#include <CGAL/Real_embeddable_traits.h>"
+    new = old + "\n#include <boost/mpl/if.hpp>"
+    if new not in contents and old in contents:
+        with open(header, "w", encoding="utf-8") as fout:
+            fout.write(contents.replace(old, new, 1))
+    elif new not in contents:
+        raise RuntimeError("Could not add the required Boost.MPL include to CGAL")
+
 def patch_cork_for_msvc():
     """Adapt the pinned Cork sources to the GMP package available on Windows."""
     if os.name != "nt":
@@ -129,6 +144,7 @@ def build(package, cleanup):
         build_generic("cgal",
                 " -DWITH_CGAL_ImageIO=Off -DWITH_CGAL_Qt5=Off",
                 cleanup=cleanup);
+        patch_cgal_for_modern_boost();
     elif package == "clipper":
         build_generic("Clipper/cpp", cleanup=cleanup);
     elif package == "eigen":
