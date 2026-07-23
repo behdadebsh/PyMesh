@@ -97,6 +97,7 @@ class cmake_build(build):
             )
             check_call([
                 "cmake", "..", "-DCMAKE_BUILD_TYPE=Release",
+                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
                 *cmake_args, *extra_cmake_args,
             ])
             check_call([

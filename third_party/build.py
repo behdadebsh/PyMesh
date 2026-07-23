@@ -45,6 +45,7 @@ def build_generic(libname, build_flags="", cleanup=True):
             "-DBUILD_SHARED_LIBS=Off",
             "-DCMAKE_POSITION_INDEPENDENT_CODE=On",
             "-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
             "-DCMAKE_INSTALL_PREFIX={}".format(
                 os.path.join(pymesh_dir, "python", "pymesh", "third_party")),
             ] + dependency_args + cmake_args;
