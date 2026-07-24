@@ -35,3 +35,4 @@ before-all = "C:/vcpkg/vcpkg.exe install boost-any:x64-windows boost-atomic:x64-
 before-build = "python -m pip install delvewheel"
 environment = { CMAKE_ARGS = "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DVORPALINE_BUILD_DYNAMIC=ON", CL = "/EHsc /DNOMINMAX", NUM_CORES = "2" }
 repair-wheel-command = "python -m delvewheel repair -w {dest_dir} {wheel}"
+test-command = 'python -c "import pymesh, sys; result = pymesh.test(); sys.exit(0 if result.wasSuccessful() else 1)"'
