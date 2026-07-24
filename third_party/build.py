@@ -57,8 +57,9 @@ def build_generic(libname, build_flags="", cleanup=True):
             "--parallel", parallel];
     subprocess.check_call(cmd);
 
+    install_parallel = "1" if os.name == "nt" else parallel;
     cmd = ["cmake", "--build", build_dir, "--config", "Release",
-            "--target", "install", "--parallel", parallel];
+            "--target", "install", "--parallel", install_parallel];
     subprocess.check_call(cmd);
 
     # Clean up
