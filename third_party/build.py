@@ -52,14 +52,17 @@ def build_generic(libname, build_flags="", cleanup=True):
     subprocess.check_call(cmd, cwd=build_dir);
 
     # Build cgal
-    parallel = os.environ.get("NUM_CORES", str(os.cpu_count() or 1));
+    requested_parallel = os.environ.get("NUM_CORES", str(os.cpu_count() or 1));
+    # vcpkg's app-local deployment can run for multiple DLL targets during the
+    # build.  MSBuild may then try to copy the same runtime DLL concurrently,
+    # which intermittently fails with a Windows file-lock error (code 32).
+    parallel = "1" if os.name == "nt" else requested_parallel;
     cmd = ["cmake", "--build", build_dir, "--config", "Release",
             "--parallel", parallel];
     subprocess.check_call(cmd);
 
-    install_parallel = "1" if os.name == "nt" else parallel;
     cmd = ["cmake", "--build", build_dir, "--config", "Release",
-            "--target", "install", "--parallel", install_parallel];
+            "--target", "install", "--parallel", parallel];
     subprocess.check_call(cmd);
 
     # Clean up
