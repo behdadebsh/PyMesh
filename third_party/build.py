@@ -9,6 +9,7 @@ import os
 import os.path
 import tempfile
 import shutil
+import shlex
 import sys
 
 def get_third_party_dependencies():
@@ -34,24 +35,85 @@ def build_generic(libname, build_flags="", cleanup=True):
         os.makedirs(build_dir);
 
     # Configure cgal
-    cmd = "cmake" + \
-            " {}/third_party/{}".format(pymesh_dir, libname) + \
-            " -DBUILD_SHARED_LIBS=Off" + \
-            " -DCMAKE_POSITION_INDEPENDENT_CODE=On" + \
-            build_flags + \
-            " -DCMAKE_INSTALL_PREFIX={}/python/pymesh/third_party/".format(pymesh_dir);
-    subprocess.check_call(cmd.split(), cwd=build_dir);
+    cmake_args = shlex.split(
+            os.environ.get("CMAKE_ARGS", ""),
+            posix=os.name != "nt");
+    dependency_args = shlex.split(build_flags, posix=os.name != "nt");
+    cmd = [
+            "cmake",
+            os.path.join(pymesh_dir, "third_party", libname),
+            "-DBUILD_SHARED_LIBS=Off",
+            "-DCMAKE_POSITION_INDEPENDENT_CODE=On",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
+            "-DCMAKE_INSTALL_PREFIX={}".format(
+                os.path.join(pymesh_dir, "python", "pymesh", "third_party")),
+            ] + dependency_args + cmake_args;
+    subprocess.check_call(cmd, cwd=build_dir);
 
     # Build cgal
-    cmd = "cmake --build {}".format(build_dir);
-    subprocess.check_call(cmd.split());
+    parallel = os.environ.get("NUM_CORES", str(os.cpu_count() or 1));
+    cmd = ["cmake", "--build", build_dir, "--config", "Release",
+            "--parallel", parallel];
+    subprocess.check_call(cmd);
 
-    cmd = "cmake --build {} --target install".format(build_dir);
-    subprocess.check_call(cmd.split());
+    cmd = ["cmake", "--build", build_dir, "--config", "Release",
+            "--target", "install", "--parallel", parallel];
+    subprocess.check_call(cmd);
 
     # Clean up
     if cleanup:
         shutil.rmtree(build_dir)
+
+def patch_eigen_for_modern_compilers():
+    """Backport Eigen 3.4's transposition expression fix.
+
+    Recent Clang and GCC versions validate this template body eagerly and reject
+    ``derived()`` on the specialized Transpose type used by the pinned Eigen
+    revision. Eigen 3.4 passes the expression itself instead.
+    """
+    header = os.path.join(
+            get_pymesh_dir(), "python", "pymesh", "third_party", "include",
+            "eigen3", "Eigen", "src", "Core", "Transpositions.h");
+    with open(header, "r", encoding="utf-8") as fin:
+        contents = fin.read();
+    old = "matrix.derived(), trt.derived());"
+    new = "matrix.derived(), trt);"
+    if old in contents:
+        with open(header, "w", encoding="utf-8") as fout:
+            fout.write(contents.replace(old, new));
+    elif new not in contents:
+        raise RuntimeError("Could not apply the Eigen transposition patch")
+
+def patch_cgal_for_modern_boost():
+    """Add the Boost.MPL include no longer supplied transitively by Boost."""
+    header = os.path.join(
+            get_pymesh_dir(), "python", "pymesh", "third_party", "include",
+            "CGAL", "number_utils.h")
+    with open(header, "r", encoding="utf-8") as fin:
+        contents = fin.read()
+    old = "#include <CGAL/Real_embeddable_traits.h>"
+    new = old + "\n#include <boost/mpl/if.hpp>"
+    if new not in contents and old in contents:
+        with open(header, "w", encoding="utf-8") as fout:
+            fout.write(contents.replace(old, new, 1))
+    elif new not in contents:
+        raise RuntimeError("Could not add the required Boost.MPL include to CGAL")
+
+    iterator = os.path.join(
+            get_pymesh_dir(), "python", "pymesh", "third_party", "include",
+            "CGAL", "boost", "graph", "iterator.h")
+    with open(iterator, "r", encoding="utf-8") as fin:
+        contents = fin.read()
+    old = "return (! (this->base() == nullptr)) ?"
+    new = "return (g != nullptr) ?"
+    if old in contents:
+        if contents.count(old) != 3:
+            raise RuntimeError("Unexpected CGAL iterator compatibility sites")
+        with open(iterator, "w", encoding="utf-8") as fout:
+            fout.write(contents.replace(old, new))
+    elif contents.count(new) != 3:
+        raise RuntimeError("Could not patch CGAL iterators for modern Boost")
 
 def build(package, cleanup):
     if package == "all":
@@ -61,8 +123,12 @@ def build(package, cleanup):
         build_generic("cgal",
                 " -DWITH_CGAL_ImageIO=Off -DWITH_CGAL_Qt5=Off",
                 cleanup=cleanup);
+        patch_cgal_for_modern_boost();
     elif package == "clipper":
         build_generic("Clipper/cpp", cleanup=cleanup);
+    elif package == "eigen":
+        build_generic("eigen", cleanup=cleanup);
+        patch_eigen_for_modern_compilers();
     elif package == "tbb":
         build_generic("tbb",
                 " -DTBB_BUILD_SHARED=On -DTBB_BUILD_STATIC=Off",

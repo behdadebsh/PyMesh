@@ -7,8 +7,9 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-build = "cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64"
-build-frontend = "build[uv]"
+build = "cp310-* cp311-* cp312-*"
+skip = "*-musllinux*"
+build-frontend = "build"
 test-requires = [
     "numpy>=1.10.4",
     "scipy>=0.17.0",
@@ -21,3 +22,9 @@ manylinux-x86_64-image = "manylinux_2_28"
 before-all = "dnf install -y boost-devel cmake gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gmp-devel mpfr-devel unzip zip && ln -sf /usr/bin/cmake /usr/local/bin/cmake"
 repair-wheel-command = "LD_LIBRARY_PATH=/project/python/pymesh/third_party/lib auditwheel repair -w {dest_dir} {wheel}"
 environment = { CC = "/opt/rh/gcc-toolset-9/root/usr/bin/gcc", CXX = "/opt/rh/gcc-toolset-9/root/usr/bin/g++", NUM_CORES = "2" }
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64"]
+before-all = "brew install boost cmake gmp mpfr"
+environment = { MACOSX_DEPLOYMENT_TARGET = "15.0", NUM_CORES = "2" }
+repair-wheel-command = "DYLD_LIBRARY_PATH=$PWD/python/pymesh/third_party/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"

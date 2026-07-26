@@ -31,11 +31,12 @@ namespace ClipperEngineHelper {
 
         for (size_t i=0; i<num_boundaries; i++) {
             const VectorI& edge = boundaries.row(i);
-            auto itr = adjacencies.find(edge[0]);
+            const size_t source = static_cast<size_t>(edge[0]);
+            auto itr = adjacencies.find(source);
             if (itr != adjacencies.end()) {
                 itr->second.push_back(edge[1]);
             } else {
-                adjacencies.insert({edge[0], {edge[1]}});
+                adjacencies.insert({source, {edge[1]}});
             }
         }
 
