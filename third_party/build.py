@@ -52,11 +52,7 @@ def build_generic(libname, build_flags="", cleanup=True):
     subprocess.check_call(cmd, cwd=build_dir);
 
     # Build cgal
-    requested_parallel = os.environ.get("NUM_CORES", str(os.cpu_count() or 1));
-    # vcpkg's app-local deployment can run for multiple DLL targets during the
-    # build.  MSBuild may then try to copy the same runtime DLL concurrently,
-    # which intermittently fails with a Windows file-lock error (code 32).
-    parallel = "1" if os.name == "nt" else requested_parallel;
+    parallel = os.environ.get("NUM_CORES", str(os.cpu_count() or 1));
     cmd = ["cmake", "--build", build_dir, "--config", "Release",
             "--parallel", parallel];
     subprocess.check_call(cmd);
@@ -119,58 +115,6 @@ def patch_cgal_for_modern_boost():
     elif contents.count(new) != 3:
         raise RuntimeError("Could not patch CGAL iterators for modern Boost")
 
-def patch_cork_for_msvc():
-    """Adapt the pinned Cork sources to the GMP package available on Windows."""
-    if os.name != "nt":
-        return
-
-    prelude = os.path.join(
-            get_pymesh_dir(), "third_party", "cork", "src", "util",
-            "prelude.h")
-    with open(prelude, "r", encoding="utf-8") as fin:
-        contents = fin.read()
-    old = "#pragma once\n\n#include <cmath>"
-    new = (
-            "#pragma once\n\n"
-            "#ifndef _USE_MATH_DEFINES\n"
-            "#define _USE_MATH_DEFINES\n"
-            "#endif\n\n"
-            "#include <cmath>\n\n"
-            "#ifndef M_PI\n"
-            "#define M_PI 3.14159265358979323846\n"
-            "#endif")
-    if old in contents:
-        with open(prelude, "w", encoding="utf-8") as fout:
-            fout.write(contents.replace(old, new, 1))
-    elif new not in contents:
-        raise RuntimeError("Could not expose math constants in Cork")
-
-    fixint = os.path.join(
-            get_pymesh_dir(), "third_party", "cork", "src", "isct",
-            "fixint.h")
-    with open(fixint, "r", encoding="utf-8") as fin:
-        contents = fin.read()
-    old = "#ifdef _WIN32\n#include <mpir.h>\n#else\n#include <gmp.h>\n#endif"
-    new = "#include <gmp.h>"
-    if old in contents:
-        with open(fixint, "w", encoding="utf-8") as fout:
-            fout.write(contents.replace(old, new, 1))
-    elif old not in contents and new not in contents:
-        raise RuntimeError("Could not switch Cork from MPIR to GMP")
-
-    gmpext = os.path.join(
-            get_pymesh_dir(), "third_party", "cork", "src", "isct",
-            "gmpext4.h")
-    with open(gmpext, "r", encoding="utf-8") as fin:
-        contents = fin.read()
-    old = "#include <mpirxx.h>"
-    new = "#include <gmpxx.h>"
-    if old in contents:
-        with open(gmpext, "w", encoding="utf-8") as fout:
-            fout.write(contents.replace(old, new, 1))
-    elif new not in contents:
-        raise RuntimeError("Could not switch Cork C++ bindings from MPIR to GMP")
-
 def build(package, cleanup):
     if package == "all":
         for libname in get_third_party_dependencies():
@@ -185,9 +129,6 @@ def build(package, cleanup):
     elif package == "eigen":
         build_generic("eigen", cleanup=cleanup);
         patch_eigen_for_modern_compilers();
-    elif package == "cork":
-        patch_cork_for_msvc();
-        build_generic("cork", cleanup=cleanup);
     elif package == "tbb":
         build_generic("tbb",
                 " -DTBB_BUILD_SHARED=On -DTBB_BUILD_STATIC=Off",

@@ -49,18 +49,6 @@ jobs:
             platform: macOS x86-64
             runner: macos-15-intel
             build-identifier: cp312-macosx_x86_64
-          - python-version: "3.10"
-            platform: Windows x86-64
-            runner: windows-2022
-            build-identifier: cp310-win_amd64
-          - python-version: "3.11"
-            platform: Windows x86-64
-            runner: windows-2022
-            build-identifier: cp311-win_amd64
-          - python-version: "3.12"
-            platform: Windows x86-64
-            runner: windows-2022
-            build-identifier: cp312-win_amd64
 
     steps:
       - name: Check out the repository

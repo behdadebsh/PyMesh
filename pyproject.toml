@@ -28,11 +28,3 @@ archs = ["x86_64"]
 before-all = "brew install boost cmake gmp mpfr"
 environment = { MACOSX_DEPLOYMENT_TARGET = "15.0", NUM_CORES = "2" }
 repair-wheel-command = "DYLD_LIBRARY_PATH=$PWD/python/pymesh/third_party/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
-
-[tool.cibuildwheel.windows]
-archs = ["AMD64"]
-before-all = "C:/vcpkg/vcpkg.exe install boost-any:x64-windows boost-atomic:x64-windows boost-callable-traits:x64-windows boost-chrono:x64-windows boost-date-time:x64-windows boost-foreach:x64-windows boost-format:x64-windows boost-graph:x64-windows boost-heap:x64-windows boost-logic:x64-windows boost-math:x64-windows boost-ptr-container:x64-windows boost-system:x64-windows boost-thread:x64-windows boost-variant:x64-windows gmp:x64-windows mpfr:x64-windows"
-before-build = "python -m pip install delvewheel"
-environment = { CMAKE_ARGS = "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DVORPALINE_BUILD_DYNAMIC=ON", CL = "/EHsc /DNOMINMAX", NUM_CORES = "2" }
-repair-wheel-command = "python -m delvewheel repair --ignore-existing --add-path python/pymesh/lib -w {dest_dir} {wheel}"
-test-command = 'python -c "import pymesh, sys; result = pymesh.test(); sys.exit(0 if result.wasSuccessful() else 1)"'

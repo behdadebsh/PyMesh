@@ -25,7 +25,7 @@ own the repository from which the release workflow runs.
        git tag -a v1.0.1 -m "PyMesh 1.0.1"
        git push origin v1.0.1
 
-4. Confirm that all Linux, macOS, and Windows wheel jobs pass and that the
+4. Confirm that all Linux and macOS wheel jobs pass and that the
    `Publish to PyPI` job succeeds.
 5. Create a GitHub release from the existing tag:
 
@@ -41,7 +41,7 @@ a version have been published, increment the package version before retrying.
 
 ## Published artifacts
 
-The workflow publishes x86-64 wheels for Linux, macOS, and Windows for
+The workflow publishes x86-64 wheels for Linux and macOS for
 supported CPython versions 3.10 through 3.12. A source distribution is not
 published because the complete native source tree exceeds PyPI's file-size
 limit.
