@@ -28,27 +28,48 @@ jobs:
           - python-version: "3.10"
             platform: Linux x86-64
             runner: ubuntu-22.04
+            architecture: x86_64
             build-identifier: cp310-manylinux_x86_64
           - python-version: "3.11"
             platform: Linux x86-64
             runner: ubuntu-22.04
+            architecture: x86_64
             build-identifier: cp311-manylinux_x86_64
           - python-version: "3.12"
             platform: Linux x86-64
             runner: ubuntu-22.04
+            architecture: x86_64
             build-identifier: cp312-manylinux_x86_64
           - python-version: "3.10"
             platform: macOS x86-64
             runner: macos-15-intel
+            architecture: x86_64
             build-identifier: cp310-macosx_x86_64
           - python-version: "3.11"
             platform: macOS x86-64
             runner: macos-15-intel
+            architecture: x86_64
             build-identifier: cp311-macosx_x86_64
           - python-version: "3.12"
             platform: macOS x86-64
             runner: macos-15-intel
+            architecture: x86_64
             build-identifier: cp312-macosx_x86_64
+          - python-version: "3.10"
+            platform: macOS arm64
+            runner: macos-15
+            architecture: arm64
+            build-identifier: cp310-macosx_arm64
+          - python-version: "3.11"
+            platform: macOS arm64
+            runner: macos-15
+            architecture: arm64
+            build-identifier: cp311-macosx_arm64
+          - python-version: "3.12"
+            platform: macOS arm64
+            runner: macos-15
+            architecture: arm64
+            build-identifier: cp312-macosx_arm64
 
     steps:
       - name: Check out the repository
@@ -70,6 +91,7 @@ jobs:
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD: ${{ matrix.build-identifier }}
+          CIBW_ARCHS: ${{ matrix.architecture }}
 
       - name: Upload wheel
         uses: actions/upload-artifact@v7
