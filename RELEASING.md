@@ -22,18 +22,18 @@ own the repository from which the release workflow runs.
 3. Create and push an annotated tag whose value is the package version prefixed
    with `v`:
 
-       git tag -a v1.0.2 -m "PyMesh 1.0.2"
-       git push origin v1.0.2
+       git tag -a v1.0.3 -m "PyMesh 1.0.3"
+       git push origin v1.0.3
 
 4. Confirm that all Linux and macOS wheel jobs pass and that the
    `Publish to PyPI` job succeeds.
 5. Create a GitHub release from the existing tag:
 
-       gh release create v1.0.2 --verify-tag --generate-notes --title "PyMesh 1.0.2"
+       gh release create v1.0.3 --verify-tag --generate-notes --title "PyMesh 1.0.3"
 
 6. Verify installation in a fresh Python environment:
 
-       python -m pip install pymesh2.0==1.0.2
+       python -m pip install pymesh2.0==1.0.3
        python -c "import pymesh; print(pymesh.__version__)"
 
 PyPI does not permit replacing files for an existing version. If any files for
@@ -41,7 +41,7 @@ a version have been published, increment the package version before retrying.
 
 ## Published artifacts
 
-The workflow publishes x86-64 wheels for Linux and macOS for
-supported CPython versions 3.10 through 3.12. A source distribution is not
-published because the complete native source tree exceeds PyPI's file-size
-limit.
+The workflow publishes x86-64 wheels for Linux, plus x86-64 and arm64 wheels
+for macOS, for supported CPython versions 3.10 through 3.12. A source
+distribution is not published because the complete native source tree exceeds
+PyPI's file-size limit.
